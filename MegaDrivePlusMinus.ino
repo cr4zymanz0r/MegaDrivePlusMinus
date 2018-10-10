@@ -237,7 +237,6 @@ enum PadButton {
    * can make up a specific combo for every mode that switches straight to it,
    * no need to cycle among modes.
    */
-  #define EUR_COMBO MD_BTN_DOWN
   #define USA_COMBO MD_BTN_RIGHT
   #define JAP_COMBO MD_BTN_LEFT
 #endif
@@ -277,15 +276,13 @@ enum PadButton {
 /* We only have two LED pins, so let's use a dual-color led and stick to the
  * D4s/Seb colors
  */
-#define MODE_LED_EUR_COLOR {0x00, 0xFF}  // Green
-#define MODE_LED_USA_COLOR {0xFF, 0xFF}  // Orange
-#define MODE_LED_JAP_COLOR {0xFF, 0x00}  // Red
+#define MODE_LED_USA_COLOR {0xFF, 0x00}  // Red
+#define MODE_LED_JAP_COLOR {0x00, 0xFF}  // Green
 
 #elif !defined __AVR_ATtinyX5__
 
-#define MODE_LED_EUR_COLOR {0x00, 0xFF, 0x00}  // Green
-#define MODE_LED_USA_COLOR {0x00, 0x00, 0xFF}  // Blue
-#define MODE_LED_JAP_COLOR {0xFF, 0x00, 0x00}  // Red
+#define MODE_LED_USA_COLOR {0xFF, 0x00, 0x00}  // Red
+#define MODE_LED_JAP_COLOR {0x00, 0xFF, 0x00}  // Green
 
 #endif
 
@@ -297,8 +294,8 @@ enum PadButton {
  * does NOT disable the RGB led, it can be used together with it, provided that
  * you have a free pin.
  *
- * Basically, the single led is blinked 1-3 times according to which mode is set
- * (1 is EUR, see enum VideoMode below).
+ * Basically, the single led is blinked 1-2 times according to which mode is set
+ * (1 is USA, see enum VideoMode below).
  */
 //#define MODE_LED_SINGLE_PIN 3
 
@@ -344,7 +341,6 @@ enum PadButton {
 #endif
 
 enum __attribute__ ((__packed__)) VideoMode {
-  EUR,
   USA,
   JAP,
   MODES_NO // Leave at end
@@ -355,7 +351,6 @@ enum __attribute__ ((__packed__)) VideoMode {
   #define ENABLE_MODE_LED_RGB
 
 const byte mode_led_colors[][MODES_NO] = {
-  MODE_LED_EUR_COLOR,
   MODE_LED_USA_COLOR,
   MODE_LED_JAP_COLOR
 };
@@ -489,10 +484,6 @@ void update_mode_leds () {
 void set_mode (VideoMode m) {
   switch (m) {
     default:
-    case EUR:
-      digitalWrite (VIDEOMODE_PIN, LOW);    // PAL 50Hz
-      digitalWrite (LANGUAGE_PIN, HIGH);    // ENG
-      break;
     case USA:
       digitalWrite (VIDEOMODE_PIN, HIGH);   // NTSC 60Hz
       digitalWrite (LANGUAGE_PIN, HIGH);    // ENG
@@ -625,7 +616,7 @@ void setup () {
   // Init video mode
   pinMode (VIDEOMODE_PIN, OUTPUT);
   pinMode (LANGUAGE_PIN, OUTPUT);
-  current_mode = EUR;
+  current_mode = USA;
 #ifdef MODE_ROM_OFFSET
   byte tmp = EEPROM.read (MODE_ROM_OFFSET);
   debug ("Loaded video mode from EEPROM: ");
@@ -864,12 +855,6 @@ inline void handle_pad () {
       reset_console ();
       pad_status = 0;     // Avoid continuous reset (pad_status might keep the last value during reset!)
       last_combo_time = millis ();
-#ifdef EUR_COMBO
-    } else if ((pad_status & EUR_COMBO) == EUR_COMBO) {
-      debugln ("EUR mode combo detected");
-      set_mode (EUR);
-      last_combo_time = millis ();
-#endif
 #ifdef USA_COMBO
     } else if ((pad_status & USA_COMBO) == USA_COMBO) {
       debugln ("USA mode combo detected");
