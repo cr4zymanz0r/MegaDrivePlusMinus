@@ -1,4 +1,5 @@
 In progress to remove EUR option for North Americans who don't care about 50hz ;)
+Change is implemented, but currently untested.
 
 ## MegaDrive++
 
